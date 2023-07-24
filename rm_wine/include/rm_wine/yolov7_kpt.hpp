@@ -28,7 +28,7 @@ using namespace InferenceEngine;
 #define ANCHOR 3 //anchor 数量
 #define DETECT_MODE 1 //ARMOR 0 WIN 1 BOARD 2
 #define DEVICE "CPU" // 设备选择
-#define VIDEO //是否展示推理视频
+// #define VIDEO //是否展示推理视频
 
 #if DETECT_MODE == 0 // 装甲板四点模型
 #define KPT_NUM 4
@@ -45,6 +45,7 @@ using namespace InferenceEngine;
 #endif
 class yolo_kpt {
 public:
+    friend class Wine;
     yolo_kpt();
 
     struct Object {

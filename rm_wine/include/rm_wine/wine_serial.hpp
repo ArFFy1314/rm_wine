@@ -8,33 +8,64 @@
 #include "auto_aim_interfaces/msg/target.hpp"
 #include "rm_wine/yolov7_kpt.hpp"
 
+#define VIRTUAL //开启可视化调图
 
 namespace rm_wine{
 
 yolo_kpt DEMO;
-std::vector<yolo_kpt::Object> result;
+std::vector<yolo_kpt::Object> result;//检测结果集合
 cv::TickMeter meter;
 
 class Wine :public rclcpp::Node
 {
 public:
+    struct Winepoints {
+        std::vector<cv::Point2f> centerpoints;
+        std::vector<cv::Point2f> helppoints;
+        cv::Point2f targetpoint;
+        cv::Point2f centerpoint;
+
+        std::vector<cv::Point2f> helppoints_polar;
+        cv::Point2f targetpoint_polar;
+        cv::Point2f centerpoint_polar;
+        Winepoints()
+        {
+            centerpoints.resize(0);
+            helppoints.resize(0);
+            targetpoint.x = 0;
+            targetpoint.y = 0;
+            centerpoint.x = 0;
+            centerpoint.y = 0;
+            helppoints_polar.resize(0);
+            targetpoint_polar.x = 0;
+            targetpoint_polar.y = 0;
+            centerpoint_polar.x = 0;
+            centerpoint_polar.y = 0;
+        }
+        cv::Point2f calculateCenterpointsAverage() {
+            cv::Point2f average(0, 0);
+            int size = centerpoints.size();
+            if (size == 0) {
+                return average;
+            }
+            for (const auto& point : centerpoints) {
+                average += point;
+            }
+            average.x /= size;
+            average.y /= size;
+            return average;
+        }
+    };
+    
     Wine(const rclcpp::NodeOptions & options);
     ~Wine();
     
 private:
-    // static void signalHandler(int signum);
-    // static bool running;
-
     void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
-
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;
-    
-    //Camera params
-    cv::Mat CAMERA_MATRIX;    //IntrinsicMatrix		  fx,fy,cx,cy
-    cv::Mat DISTORTION_COEFF; //DistortionCoefficients k1,k2,p1,p2
+    Winepoints detectPoint(const cv::Mat& src_img,const std::vector<yolo_kpt::Object>& ObjR);
 
-    float yaw;  
-    float pitch; 
+    Winepoints detectpoints;
 };
 }
 

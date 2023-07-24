@@ -17,21 +17,12 @@ public:
         RCLCPP_INFO(this->get_logger(), "virtual_imgpub is starting");
         std::filesystem::path videoPath(VIDEO_PATH);
         if (std::filesystem::exists(videoPath)) {
-            // 读取视频
-            cap.open(VIDEO_PATH);
-            if (!cap.isOpened()) {
-                RCLCPP_INFO(this->get_logger(), "无法打开视频文件");
-                return;
-            }
+            openVideo();
         } else {
-            // 打开摄像头
-            cap.open(0);
-            if (!cap.isOpened()) {
-                RCLCPP_INFO(this->get_logger(), "无法打开摄像头");
-                return;
-            }
+            RCLCPP_INFO(this->get_logger(), "无法找到视频文件");
+            return;
         }
-        double frame_rate = this->declare_parameter("frame_rate", 60.0);
+        double frame_rate = this->declare_parameter("frame_rate", 10.0);
         timer_interval_ = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / frame_rate));
 
         publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/virtual/raw_img", 10);
@@ -39,12 +30,28 @@ public:
     }
 
 private:
+    void openVideo()
+    {
+        cap.open(VIDEO_PATH);
+        if (!cap.isOpened()) {
+            RCLCPP_INFO(this->get_logger(), "无法打开视频文件");
+        }
+    }
+
     void timer_callback()
     {
+        if (!cap.isOpened()) {
+            openVideo(); // 重新打开视频文件
+            if (!cap.isOpened()) {
+                RCLCPP_INFO(this->get_logger(), "文件读取完毕，正在重新加载");
+                return;
+            }
+        }
+
         cv::Mat src_img;
         bool ret = cap.read(src_img);
         if (!ret) {
-            RCLCPP_INFO(this->get_logger(), "无法读取图像");
+            cap.release(); // 释放视频资源
             return;
         }
 
@@ -61,6 +68,7 @@ private:
 
         publisher_->publish(std::move(message));
     }
+
     cv::VideoCapture cap;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;

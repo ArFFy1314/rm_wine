@@ -66,7 +66,7 @@ void yolo_kpt::drawPred(int classId, float conf, cv::Rect box, std::vector<cv::P
     float y0 = box.y;
     float x1 = box.x + box.width;
     float y1 = box.y + box.height;
-    cv::rectangle(frame, cv::Point(x0, y0), cv::Point(x1, y1), cv::Scalar(255, 255, 255), 1);
+    cv::rectangle(frame, cv::Point(x0, y0), cv::Point(x1, y1), cv::Scalar(0, 255, 255), 1);//目标框
 
     cv::Point2f keypoints_center(0, 0);
     std::vector<bool> valid_keypoints(5, false);
@@ -91,15 +91,15 @@ void yolo_kpt::drawPred(int classId, float conf, cv::Rect box, std::vector<cv::P
         keypoints_center = cv::Point2f(x0 + box.width / 2, y0 + box.height / 2);
     }
 
-    cv::circle(frame, keypoints_center, 2, cv::Scalar(255, 255, 255), 2);
+    cv::circle(frame, keypoints_center, 2, cv::Scalar(255, 255, 255), 2);//待击打靶装甲中心
 
 
     for (int i = 0; i < KPT_NUM; i++)
         if (DETECT_MODE == 1){
             if (i == 2)
-                cv::circle(frame, point[i], 4, cv::Scalar(163, 164, 163), 4);
+                cv::circle(frame, point[i], 4, cv::Scalar(163, 164, 163), 4);//R字
             else
-                cv::circle(frame, point[i], 3, cv::Scalar(0, 255, 0), 3);
+                cv::circle(frame, point[i], 3, cv::Scalar(0, 255, 0), 3);//检测点
         }
 
     std::string label = cv::format("%.2f", conf);
