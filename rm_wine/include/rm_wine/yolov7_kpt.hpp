@@ -45,7 +45,6 @@ using namespace InferenceEngine;
 #endif
 class yolo_kpt {
 public:
-    friend class Wine;
     yolo_kpt();
 
     struct Object {

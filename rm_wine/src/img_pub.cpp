@@ -22,7 +22,7 @@ public:
             RCLCPP_INFO(this->get_logger(), "无法找到视频文件");
             return;
         }
-        double frame_rate = this->declare_parameter("frame_rate", 10.0);
+        double frame_rate = this->declare_parameter("frame_rate", 50.0);
         timer_interval_ = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(1.0 / frame_rate));
 
         publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/virtual/raw_img", 10);
@@ -57,6 +57,13 @@ private:
 
         sensor_msgs::msg::Image::UniquePtr message = std::make_unique<sensor_msgs::msg::Image>();
         message->header.stamp = this->now();
+
+        rclcpp::Time timestamp = message->header.stamp;
+        double timestamp_value = timestamp.seconds();
+        RCLCPP_INFO(this->get_logger(),"Timestamp_S_value: %f\n", timestamp_value);
+        // double nanos = static_cast<float>(message->header.stamp.nanosec) / 1e9;
+        // RCLCPP_INFO(this->get_logger(),"Timestamp_N_value: %f\n", nanos);
+        
         message->header.frame_id = "frame";
         message->encoding = "bgr8";
         message->height = src_img.rows;
